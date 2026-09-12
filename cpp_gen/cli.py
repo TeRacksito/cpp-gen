@@ -97,8 +97,10 @@ def main():
 
         cmake_path = base_path / "CMakeLists.txt"
         main_path = base_path / "src" / "main.cc"
+        readme_path = base_path / "README.md"
         template_cmake = env.get_template("cmakelists.txt.j2")
         template_main = env.get_template("main.cc.j2")
+        template_readme = env.get_template("readme.md.j2")
 
         rendered_cmake = template_cmake.render(
             project_name=project_name, executable_name=project_name
@@ -106,10 +108,14 @@ def main():
         rendered_main = template_main.render(
             author=args.author, year=now.strftime("%Y"), project_name=project_name
         )
+        rendered_readme = template_readme.render(
+            project_name=project_name, executable_name=project_name
+        )
 
         print(f"Generating {mode} '{project_name}'")
         write_file(cmake_path, rendered_cmake, overwrite)
         write_file(main_path, rendered_main, overwrite)
+        write_file(readme_path, rendered_readme, overwrite)
         return
 
     class_name = format_capitalize(base_path)
