@@ -1,0 +1,19 @@
+cmake_minimum_required(VERSION 3.10)
+project({{ project_name }} LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS "src/*.cc" "src/*.cpp" "src/*.h")
+
+add_executable({{ executable_name }} ${SRC_FILES})
+
+target_include_directories({{ executable_name }} PRIVATE 
+    "${CMAKE_CURRENT_SOURCE_DIR}/src"
+)
+
+set_target_properties({{ executable_name }} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/bin"
+)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

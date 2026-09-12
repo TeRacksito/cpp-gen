@@ -17,13 +17,7 @@ Install the package in editable mode:
 pip install -e .
 ```
 
-Copy the example environment file:
 
-```bash
-cp .env.example .env
-```
-
-Setting default values for `DEFAULT_AUTHOR` and `DEFAULT_NAMESPACE` in `.env` is optional.
 
 Check the available commands with:
 
@@ -37,4 +31,20 @@ To install the CLI tool system-wide for your Ubuntu user, install and configure 
 
 ```bash
 pipx install .
+```
+
+## Defaults
+
+You can define default values for the author and namespace in a `.cpp-gen.env` file in your home directory. For example:
+
+```bash
+DEFAULT_AUTHOR="name"
+DEFAULT_NAMESPACE="my_namespace"
+```
+
+You can easily create this file with the following command:
+
+```bash
+echo 'DEFAULT_AUTHOR="name"' >> ~/.cpp-gen.env
+echo 'DEFAULT_NAMESPACE="my_namespace"' >> ~/.cpp-gen.env
 ```

@@ -8,7 +8,9 @@ from pathlib import Path
 from dotenv import load_dotenv
 from jinja2 import Environment, PackageLoader
 
-load_dotenv()
+home_env = Path.home() / ".cpp-gen.env"
+if home_env.exists():
+    load_dotenv(home_env)
 
 DEFAULT_AUTHOR = os.getenv("DEFAULT_AUTHOR", None)
 DEFAULT_NAMESPACE = os.getenv("DEFAULT_NAMESPACE", None)
@@ -67,28 +69,50 @@ group.add_argument(
     help="If true, the generated boilerplate will be a function. Default is false",
 )
 
-
-def write_file(filepath: Path, content: str, overwrite: bool):
-    if filepath.exists() and not overwrite:
-        print(f"Skipped: '{filepath}' already exists. Use --overwrite to overwrite it.")
-        return
-
-    status = "Overwritten" if filepath.exists() else "Created"
-    filepath.parent.mkdir(parents=True, exist_ok=True)
-    filepath.write_text(content)
-    print(f"{status}: {filepath}")
+group.add_argument(
+    "--project",
+    "-p",
+    dest="is_project",
+    const="project",
+    action="store_const",
+    help="If true, a new project will be created. Default is false",
+)
 
 
 def main():
     args = parser.parse_args(["--help"] if len(sys.argv) == 1 else None)
 
-    mode: str | None = args.is_class or args.is_function or None
+    mode: str | None = args.is_class or args.is_function or args.is_project or None
 
     if not mode:
         raise ValueError("You must specify either --class or --function.")
 
     base_path = Path(args.filename)
-    class_name = "".join(word.capitalize() for word in base_path.name.split("_"))
+    now = datetime.now()
+    env = Environment(loader=PackageLoader("cpp_gen", "templates"))
+    overwrite = args.overwrite or False
+
+    if mode == "project":
+        project_name = format_capitalize(base_path)
+
+        cmake_path = base_path / "CMakeLists.txt"
+        main_path = base_path / "src" / "main.cc"
+        template_cmake = env.get_template("cmakelists.txt.j2")
+        template_main = env.get_template("main.cc.j2")
+
+        rendered_cmake = template_cmake.render(
+            project_name=project_name, executable_name=project_name
+        )
+        rendered_main = template_main.render(
+            author=args.author, year=now.strftime("%Y"), project_name=project_name
+        )
+
+        print(f"Generating {mode} '{project_name}'")
+        write_file(cmake_path, rendered_cmake, overwrite)
+        write_file(main_path, rendered_main, overwrite)
+        return
+
+    class_name = format_capitalize(base_path)
     guard_base = base_path.as_posix().strip("./")
     guard = re.sub(r"[^a-zA-Z0-9]", "_", guard_base).upper() + "_H"
 
@@ -96,11 +120,8 @@ def main():
     source_path = Path(f"{args.filename}.cc")
     include_fname = header_path.as_posix()
 
-    env = Environment(loader=PackageLoader("cpp_gen", "templates"))
     template_h = env.get_template("header.h.j2")
     template_cc = env.get_template("source.cc.j2")
-
-    now = datetime.now()
 
     context = {
         "author": args.author,
@@ -119,8 +140,23 @@ def main():
     )
 
     print(f"Generating {mode} '{class_name}'")
-    write_file(header_path, rendered_h, getattr(args, "overwrite", False))
-    write_file(source_path, rendered_cc, getattr(args, "overwrite", False))
+    write_file(header_path, rendered_h, overwrite)
+    write_file(source_path, rendered_cc, overwrite)
+
+
+def format_capitalize(base_path):
+    return "".join(word.capitalize() for word in base_path.name.split("_"))
+
+
+def write_file(filepath: Path, content: str, overwrite: bool):
+    if filepath.exists() and not overwrite:
+        print(f"Skipped: '{filepath}' already exists. Use --overwrite to overwrite it.")
+        return
+
+    status = "Overwritten" if filepath.exists() else "Created"
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    filepath.write_text(content)
+    print(f"{status}: {filepath}")
 
 
 if __name__ == "__main__":
