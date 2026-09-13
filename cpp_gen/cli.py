@@ -1,6 +1,7 @@
 import re
 import argparse
 import os
+import shutil
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -9,6 +10,7 @@ from dotenv import load_dotenv
 from jinja2 import Environment, PackageLoader
 
 home_env = Path.home() / ".cpp-gen.env"
+home_project_files = Path.home() / ".cpp-gen"
 if home_env.exists():
     load_dotenv(home_env)
 
@@ -136,6 +138,7 @@ def main():
         write_file(cmake_path, rendered_cmake, overwrite)
         write_file(main_path, rendered_main, overwrite)
         write_file(readme_path, rendered_readme, overwrite)
+        copy_project_files(home_project_files, base_path, overwrite)
         return
 
     class_name = format_capitalize(base_path)
@@ -184,6 +187,30 @@ def write_file(filepath: Path, content: str, overwrite: bool):
     filepath.parent.mkdir(parents=True, exist_ok=True)
     filepath.write_text(content)
     print(f"{status}: {filepath}")
+
+
+def copy_project_files(source_path: Path, destination_path: Path, overwrite: bool):
+    if not source_path.is_dir():
+        return
+
+    for source_file in sorted(source_path.rglob("*")):
+        relative_path = source_file.relative_to(source_path)
+        destination_file = destination_path / relative_path
+
+        if source_file.is_dir():
+            destination_file.mkdir(parents=True, exist_ok=True)
+            continue
+
+        if destination_file.exists() and not overwrite:
+            print(
+                f"Skipped: '{destination_file}' already exists. Use --overwrite to overwrite it."
+            )
+            continue
+
+        destination_file.parent.mkdir(parents=True, exist_ok=True)
+        status = "Overwritten" if destination_file.exists() else "Created"
+        shutil.copy2(source_file, destination_file)
+        print(f"{status}: {destination_file}")
 
 
 if __name__ == "__main__":

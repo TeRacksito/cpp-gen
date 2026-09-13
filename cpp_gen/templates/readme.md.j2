@@ -14,3 +14,7 @@ To run the executable, use the following command:
 ```bash
 ./build/bin/{{ executable_name }}
 ```
+
+## Custom Project Files
+
+Before initializing a project, you can optionally create `~/.cpp-gen` and add files or folders to it. When using `cpp-gen <project-name> --project`, its contents are copied into the new project while preserving the same hierarchy. Existing files are only replaced when `--overwrite` is used.
