@@ -50,3 +50,7 @@ echo 'DEFAULT_AUTHOR="name"' >> ~/.cpp-gen.env
 echo 'DEFAULT_NAMESPACE="my_namespace"' >> ~/.cpp-gen.env
 echo 'DEFAULT_PROLOGUE="This is a prologue\nwith multiple lines."' >> ~/.cpp-gen.env
 ```
+
+## Custom Project Files
+
+Before initializing a project, you can optionally create `~/.cpp-gen` and add files or folders to it. When using `cpp-gen <project-name> --project`, its contents are copied into the new project while preserving the same hierarchy. Existing files are only replaced when `--overwrite` is used.
