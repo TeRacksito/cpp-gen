@@ -40,6 +40,7 @@ You can define default values for the author and namespace in a `.cpp-gen.env` f
 ```bash
 DEFAULT_AUTHOR="name"
 DEFAULT_NAMESPACE="my_namespace"
+DEFAULT_PROLOGUE="This is a prologue\nwith multiple lines."
 ```
 
 You can easily create this file with the following command:
@@ -47,4 +48,5 @@ You can easily create this file with the following command:
 ```bash
 echo 'DEFAULT_AUTHOR="name"' >> ~/.cpp-gen.env
 echo 'DEFAULT_NAMESPACE="my_namespace"' >> ~/.cpp-gen.env
+echo 'DEFAULT_PROLOGUE="This is a prologue\nwith multiple lines."' >> ~/.cpp-gen.env
 ```

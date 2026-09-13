@@ -14,6 +14,7 @@ if home_env.exists():
 
 DEFAULT_AUTHOR = os.getenv("DEFAULT_AUTHOR", None)
 DEFAULT_NAMESPACE = os.getenv("DEFAULT_NAMESPACE", None)
+DEFAULT_PROLOGUE = os.getenv("DEFAULT_PROLOGUE", None)
 
 parser = argparse.ArgumentParser(
     prog="C++ Boilerplate Generator",
@@ -40,6 +41,13 @@ parser.add_argument(
     default=DEFAULT_NAMESPACE,
     required=False if DEFAULT_NAMESPACE else True,
     help=f"The Namespaces the generated files will use. {f" Default is '{DEFAULT_NAMESPACE}'" if DEFAULT_NAMESPACE else ""}",
+)
+
+parser.add_argument(
+    "--prologue",
+    "-l",
+    default=DEFAULT_PROLOGUE,
+    help=f"The Prologue of the generated files. {f" Default is '{DEFAULT_PROLOGUE.replace(chr(10), r'\\n')[:40]}...'" if DEFAULT_PROLOGUE else ""}",
 )
 
 parser.add_argument(
@@ -80,6 +88,7 @@ group.add_argument(
 
 
 def main():
+    global DEFAULT_PROLOGUE
     args = parser.parse_args(["--help"] if len(sys.argv) == 1 else None)
 
     mode: str | None = args.is_class or args.is_function or args.is_project or None
@@ -91,6 +100,14 @@ def main():
     now = datetime.now()
     env = Environment(loader=PackageLoader("cpp_gen", "templates"))
     overwrite = args.overwrite or False
+
+    if DEFAULT_PROLOGUE:
+        DEFAULT_PROLOGUE = "\n".join(
+            [
+                f"{f" * " if i > 0 else ' '}{line}"
+                for i, line in enumerate((DEFAULT_PROLOGUE + "\n").splitlines())
+            ]
+        )
 
     if mode == "project":
         project_name = format_capitalize(base_path)
@@ -106,7 +123,10 @@ def main():
             project_name=project_name, executable_name=project_name
         )
         rendered_main = template_main.render(
-            author=args.author, year=now.strftime("%Y"), project_name=project_name
+            author=args.author,
+            year=now.strftime("%Y"),
+            project_name=project_name,
+            prologue=DEFAULT_PROLOGUE,
         )
         rendered_readme = template_readme.render(
             project_name=project_name, executable_name=project_name
@@ -138,6 +158,7 @@ def main():
         "guard": guard,
         "year": now.strftime("%Y"),
         "date": now.strftime("%Y-%m-%d"),
+        "prologue": DEFAULT_PROLOGUE,
     }
 
     rendered_h = template_h.render(fname_h=header_path.name, **context)
