@@ -4,16 +4,22 @@ project({{ project_name }} LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS "src/*.cc" "src/*.cpp" "src/*.h")
+file(GLOB_RECURSE SHARED_SRC_FILES CONFIGURE_DEPENDS "src/*.cc" "src/*.cpp" "src/*.h")
 
-add_executable({{ executable_name }} ${SRC_FILES})
+file(GLOB ENTRY_POINTS CONFIGURE_DEPENDS "*.cc")
 
-target_include_directories({{ executable_name }} PRIVATE 
-    "${CMAKE_CURRENT_SOURCE_DIR}/src"
-)
+foreach(ENTRY_POINT IN LISTS ENTRY_POINTS)
+    get_filename_component(EXEC_NAME "${ENTRY_POINT}" NAME_WE)
 
-set_target_properties({{ executable_name }} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/bin"
-)
+    add_executable(${EXEC_NAME} ${ENTRY_POINT} ${SHARED_SRC_FILES})
+
+    target_include_directories(${EXEC_NAME} PRIVATE 
+        "${CMAKE_CURRENT_SOURCE_DIR}/src"
+    )
+
+    set_target_properties(${EXEC_NAME} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/build/bin"
+    )
+endforeach()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
