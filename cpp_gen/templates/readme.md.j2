@@ -2,6 +2,14 @@
 
 ## Compilation
 
+### Directly with make
+
+```bash
+make
+```
+
+### With cmake
+
 ```bash
 cmake -S . -B build
 cmake --build build
@@ -13,4 +21,25 @@ To run the executable, use the following command:
 
 ```bash
 ./build/bin/{{ executable_name }}
+```
+
+## Cleaning the environment
+
+### Directly with make
+
+```bash
+make clean
+```
+
+### with cmake
+
+```bash
+cmake -E rm -rf build
+```
+
+### cleaning only compilation files
+
+```bash
+cd build
+make clean
 ```

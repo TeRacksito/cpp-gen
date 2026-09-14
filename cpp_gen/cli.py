@@ -115,9 +115,11 @@ def main():
         project_name = format_capitalize(base_path)
 
         cmake_path = base_path / "CMakeLists.txt"
+        make_path = base_path / "Makefile"
         main_path = base_path / "src" / "main.cc"
         readme_path = base_path / "README.md"
         template_cmake = env.get_template("cmakelists.txt.j2")
+        template_make = env.get_template("makefile.j2")
         template_main = env.get_template("main.cc.j2")
         template_readme = env.get_template("readme.md.j2")
 
@@ -133,9 +135,14 @@ def main():
         rendered_readme = template_readme.render(
             project_name=project_name, executable_name=project_name
         )
+        rendered_make = template_make.render(
+            author=args.author,
+            year=now.strftime("%Y"),
+        )
 
         print(f"Generating {mode} '{project_name}'")
         write_file(cmake_path, rendered_cmake, overwrite)
+        write_file(make_path, rendered_make, overwrite)
         write_file(main_path, rendered_main, overwrite)
         write_file(readme_path, rendered_readme, overwrite)
         copy_project_files(home_project_files, base_path, overwrite)
