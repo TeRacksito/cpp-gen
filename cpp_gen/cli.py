@@ -116,7 +116,7 @@ def main():
 
         cmake_path = base_path / "CMakeLists.txt"
         make_path = base_path / "Makefile"
-        main_path = base_path / "src" / "main.cc"
+        main_path = base_path / "main.cc"
         readme_path = base_path / "README.md"
         template_cmake = env.get_template("cmakelists.txt.j2")
         template_make = env.get_template("makefile.j2")
